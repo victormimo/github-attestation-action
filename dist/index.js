@@ -34,107 +34,141 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.main = void 0;
 const core = __importStar(require("@actions/core"));
-const github = __importStar(require("@actions/github"));
-const attest_1 = require("./attest");
-const config_1 = require("./config");
 const githubApiClient_1 = require("./github/githubApiClient");
+const scoring_1 = require("./scoring");
+const owner = "Lienfluent";
+const repository = "lienfluent-app";
+const pullRequestNumber = 581; // PR number you're interested in
+const username = "victormimo";
+const gitApiKey = "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 Second PAT: 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 CODES 11e87-f37a75b0dd-ff2f4270c6-f12a8a7f9c-24df5abd78-be423b9c0d-d1cfe2cb27-b0c470f31c-fe43128027-0385b905cc-a30f484511-4cba8ce825-b168667ca7-8b0af930d1-c71eeba2d3-633343f8a6-c4992";
 function main() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w;
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const privateKey = core.getInput('private-key', { required: true, trimWhitespace: true });
-            const network = core.getInput('network', { required: false, trimWhitespace: true }) || 'sepolia';
-            const rpcUrl = core.getInput('rpc-url', { required: false, trimWhitespace: true }) || config_1.defaultNetworks[network].rpc;
-            const gitApiKey = core.getInput('git-api', { required: false, trimWhitespace: true });
-            const _branch = core.getInput('branch', { required: false, trimWhitespace: true }) || '';
-            const _branches = core.getMultilineInput('branches', { required: false, trimWhitespace: true }) || [];
-            const allowedBranches = (_branches === null || _branches === void 0 ? void 0 : _branches.length) ? _branches : [_branch];
-            if (!privateKey) {
-                throw new Error('private-key is required');
-            }
-            if (!network) {
-                throw new Error('network is required');
-            }
-            if (!rpcUrl) {
-                throw new Error('rpc-url is required');
-            }
-            if (!config_1.supportedNetworks.has(network)) {
-                throw new Error(`network "${network}" is not supported`);
-            }
-            const repo = ((_c = (_b = (_a = github === null || github === void 0 ? void 0 : github.context) === null || _a === void 0 ? void 0 : _a.payload) === null || _b === void 0 ? void 0 : _b.repository) === null || _c === void 0 ? void 0 : _c.full_name) || '';
-            const branch = (_e = (_d = github === null || github === void 0 ? void 0 : github.context) === null || _d === void 0 ? void 0 : _d.ref) === null || _e === void 0 ? void 0 : _e.replace('refs/heads/', '');
-            const username = (_j = (_h = (_g = (_f = github === null || github === void 0 ? void 0 : github.context) === null || _f === void 0 ? void 0 : _f.payload) === null || _g === void 0 ? void 0 : _g.pull_request) === null || _h === void 0 ? void 0 : _h.user) === null || _j === void 0 ? void 0 : _j.login;
-            const pullRequestLink = (_m = (_l = (_k = github === null || github === void 0 ? void 0 : github.context) === null || _k === void 0 ? void 0 : _k.payload) === null || _l === void 0 ? void 0 : _l.pull_request) === null || _m === void 0 ? void 0 : _m.html_url;
-            const pullRequestName = ((_q = (_p = (_o = github === null || github === void 0 ? void 0 : github.context) === null || _o === void 0 ? void 0 : _o.payload) === null || _p === void 0 ? void 0 : _p.pull_request) === null || _q === void 0 ? void 0 : _q.title) || ((_t = (_s = (_r = github === null || github === void 0 ? void 0 : github.context) === null || _r === void 0 ? void 0 : _r.payload) === null || _s === void 0 ? void 0 : _s.pull_request) === null || _t === void 0 ? void 0 : _t.body) || 'Name not found';
+            // const privateKey = core.getInput("private-key", {
+            //   required: true,
+            //   trimWhitespace: true,
+            // });
+            // const network =
+            //   core.getInput("network", { required: false, trimWhitespace: true }) ||
+            //   "sepolia";
+            // const rpcUrl =
+            //   core.getInput("rpc-url", { required: false, trimWhitespace: true }) ||
+            //   defaultNetworks[network].rpc;
+            // const gitApiKey = core.getInput("git-api", {
+            //   required: false,
+            //   trimWhitespace: true,
+            // });
+            // const _branch =
+            //   core.getInput("branch", { required: false, trimWhitespace: true }) || "";
+            // const _branches =
+            //   core.getMultilineInput("branches", {
+            //     required: false,
+            //     trimWhitespace: true,
+            //   }) || [];
+            // const allowedBranches = (
+            //   _branches === null || _branches === void 0 ? void 0 : _branches.length
+            // )
+            //   ? _branches
+            //   : [_branch];
+            // if (!privateKey) {
+            //   throw new Error("private-key is required");
+            // }
+            // if (!network) {
+            //   throw new Error("network is required");
+            // }
+            // if (!rpcUrl) {
+            //   throw new Error("rpc-url is required");
+            // }
+            // if (!supportedNetworks.has(network)) {
+            //   throw new Error(`network "${network}" is not supported`);
+            // }
+            // const repo = github?.context?.payload?.repository?.full_name || "";
+            // const branch = github?.context?.ref?.replace("refs/heads/", "");
+            // const username = github?.context?.payload?.pull_request?.user?.login;
+            // const pullRequestLink = github?.context?.payload?.pull_request?.html_url;
+            // const pullRequestName =
+            //   github?.context?.payload?.pull_request?.title ||
+            //   github?.context?.payload?.pull_request?.body ||
+            //   "Name not found";
             const githubApiClient = new githubApiClient_1.GithubApiClient(gitApiKey);
-            const [owner, repository] = repo.split('/');
-            const pullRequestNumber = ((_w = (_v = (_u = github === null || github === void 0 ? void 0 : github.context) === null || _u === void 0 ? void 0 : _u.payload) === null || _v === void 0 ? void 0 : _v.pull_request) === null || _w === void 0 ? void 0 : _w.number) || 0;
+            // const [owner, repository] = repo.split("/");
+            // const pullRequestNumber =
+            //   github?.context?.payload?.pull_request?.number || 0;
             const { additions, deletions } = yield githubApiClient.getAdditionsAndDelegationsOfPr(owner, repository, username, pullRequestNumber);
-            if (!repo) {
-                console.log('repo is not available, skipping attestation.');
-                return;
-            }
-            if (!branch) {
-                console.log('branch is not available, skipping attestation.');
-                return;
-            }
-            if (!username) {
-                console.log('username is not available, skipping attestation.');
-                return;
-            }
-            if (!pullRequestLink) {
-                console.log('pullRequestLink is not available, skipping attestation.');
-                return;
-            }
-            if (!pullRequestName) {
-                console.log('pullRequestName is not available, skipping attestation.');
-                return;
-            }
-            if (!allowedBranches.includes(branch)) {
-                console.log(`branch "${branch}" is not an allowed branch, skipping attestation.`);
-                return;
-            }
-            const isPullRequestMerged = !!github.context.payload.pull_request && github.context.payload.action == 'closed' && github.context.payload.pull_request.merged;
-            if (!isPullRequestMerged) {
-                console.log('event is not a pull request merge, skipping attestation.');
-                return;
-            }
-            console.log('Inputs:', {
-                allowedBranches,
-                network,
-                rpcUrl,
-                repo,
-                branch,
-                username,
-                pullRequestLink,
-                pullRequestName,
-                additions,
-                deletions,
-            });
-            const { hash, uid } = yield (0, attest_1.attest)({
-                privateKey,
-                network,
-                rpcUrl,
-                repo,
-                branch,
-                username,
-                pullRequestLink,
-                pullRequestName,
-                additions,
-                deletions
-            });
-            console.log('Transaction hash:', hash);
-            console.log('New attestation UID:', uid);
-            console.log('Setting outputs...');
-            core.setOutput('hash', hash);
-            core.setOutput('uid', uid);
-            console.log('Done!');
+            console.log("here");
+            const prFiles = yield githubApiClient.getPrFiles(owner, repository, pullRequestNumber);
+            const prCommits = yield githubApiClient.getPrCommits(owner, repository, pullRequestNumber);
+            const score = yield (0, scoring_1.scoreContributors)(prFiles, prCommits);
+            // if (!repo) {
+            //   console.log("repo is not available, skipping attestation.");
+            //   return;
+            // }
+            // if (!branch) {
+            //   console.log("branch is not available, skipping attestation.");
+            //   return;
+            // }
+            // if (!username) {
+            //   console.log("username is not available, skipping attestation.");
+            //   return;
+            // }
+            // if (!pullRequestLink) {
+            //   console.log("pullRequestLink is not available, skipping attestation.");
+            //   return;
+            // }
+            // if (!pullRequestName) {
+            //   console.log("pullRequestName is not available, skipping attestation.");
+            //   return;
+            // }
+            // if (!allowedBranches.includes(branch)) {
+            //   console.log(
+            //     `branch "${branch}" is not an allowed branch, skipping attestation.`
+            //   );
+            //   return;
+            // }
+            // const isPullRequestMerged =
+            //   !!github.context.payload.pull_request &&
+            //   github.context.payload.action == "closed" &&
+            //   github.context.payload.pull_request.merged;
+            // if (!isPullRequestMerged) {
+            //   console.log("event is not a pull request merge, skipping attestation.");
+            //   return;
+            // }
+            // console.log("Inputs:", {
+            //   allowedBranches,
+            //   network,
+            //   rpcUrl,
+            //   repo,
+            //   branch,
+            //   username,
+            //   pullRequestLink,
+            //   pullRequestName,
+            //   additions,
+            //   deletions,
+            // });
+            // const { hash, uid } = await attest({
+            //   privateKey,
+            //   network,
+            //   rpcUrl,
+            //   repo,
+            //   branch,
+            //   username,
+            //   pullRequestLink,
+            //   pullRequestName,
+            //   additions,
+            //   deletions,
+            // });
+            // console.log("Transaction hash:", hash);
+            // console.log("New attestation UID:", uid);
+            // console.log("Setting outputs...");
+            // core.setOutput("hash", hash);
+            // core.setOutput("uid", uid);
+            console.log("Done!");
         }
         catch (err) {
-            console.log('... an error occurred in this step.');
+            console.log("... an error occurred in this step.");
             core.setFailed(err.message);
         }
     });
 }
 exports.main = main;
-main().catch(error => core.setFailed(error.message));
+main().catch((error) => core.setFailed(error.message));

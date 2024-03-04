@@ -20,8 +20,38 @@ class GithubApiClient {
         this.client = axios_1.default.create({
             baseURL: "https://api.github.com/graphql",
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${gitApi || process.env.GITHUB_API_KEY}`
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${gitApi || process.env.GITHUB_API_KEY}`,
+            },
+        });
+        this.restClient = axios_1.default.create({
+            baseURL: "https://api.github.com",
+            headers: {
+                Authorization: `Bearer ${gitApi || process.env.GITHUB_API_KEY}`,
+            },
+        });
+    }
+    getPrFiles(owner, repo, pullNumber) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const response = yield this.restClient.get(`/repos/${owner}/${repo}/pulls/${pullNumber}/files`);
+                return response.data; // Returns an array of file objects
+            }
+            catch (error) {
+                console.error("Error fetching PR files:", error);
+                return [];
+            }
+        });
+    }
+    getPrCommits(owner, repo, pullNumber) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const response = yield this.restClient.get(`/repos/${owner}/${repo}/pulls/${pullNumber}/commits`);
+                return response.data; // Returns an array of commit objects
+            }
+            catch (error) {
+                console.error("Error fetching PR commits:", error);
+                return [];
             }
         });
     }
@@ -33,9 +63,12 @@ class GithubApiClient {
                 let after = null;
                 while (true) {
                     const query = (0, query_1.queryGetMergedPRsByAuthor)(owner, repository, after);
-                    const response = yield this.client.post('', { query });
+                    const response = yield this.client.post("", { query });
+                    console.log("response.data: ", response.data);
                     const prS = ((_c = (_b = (_a = response.data.data) === null || _a === void 0 ? void 0 : _a.repository) === null || _b === void 0 ? void 0 : _b.pullRequests) === null || _c === void 0 ? void 0 : _c.nodes) || [];
-                    const filteredPRs = !author ? prS : prS === null || prS === void 0 ? void 0 : prS.filter((pr) => pr.author.login.toLowerCase() === author.toLowerCase());
+                    const filteredPRs = !author
+                        ? prS
+                        : prS === null || prS === void 0 ? void 0 : prS.filter((pr) => pr.author.login.toLowerCase() === author.toLowerCase());
                     if (!filteredPRs) {
                         break;
                     }
@@ -47,7 +80,7 @@ class GithubApiClient {
                 }
             }
             catch (err) {
-                console.log('err: ', err);
+                console.log("err: ", err);
             }
             return [...uniqueMergedPRs];
         });
@@ -55,10 +88,10 @@ class GithubApiClient {
     getAdditionsAndDelegationsOfPr(owner, repository, author, pullRequestNumber) {
         return __awaiter(this, void 0, void 0, function* () {
             const allPrs = yield this.mergedPRsByAuthor(owner, repository, author);
-            const pr = allPrs.find(p => +p.number === +pullRequestNumber);
+            const pr = allPrs.find((p) => +p.number === +pullRequestNumber);
             return {
                 additions: ((pr === null || pr === void 0 ? void 0 : pr.additions) || 0).toString(),
-                deletions: ((pr === null || pr === void 0 ? void 0 : pr.deletions) || 0).toString()
+                deletions: ((pr === null || pr === void 0 ? void 0 : pr.deletions) || 0).toString(),
             };
         });
     }

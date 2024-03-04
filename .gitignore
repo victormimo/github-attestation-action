@@ -3,3 +3,5 @@
 #dist
 
 .env
+# ignoring until I have better wifi
+node_modules
