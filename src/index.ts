@@ -5,12 +5,15 @@ import { defaultNetworks, supportedNetworks } from "./config";
 import { GithubApiClient } from "./github/githubApiClient";
 import { scoreContributors } from "./scoring";
 
+import dotenv from "dotenv";
+dotenv.config();
+
 const owner = "victormimo";
 const repository = "alpha-ai-0";
 const pullRequestNumber = 6; // PR number you're interested in
 const username = "victormimo";
 
-const gitApiKey = "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";
+const gitApiKey = process.env.GITHUB_API_KEY;
 
 export async function main() {
   try {
